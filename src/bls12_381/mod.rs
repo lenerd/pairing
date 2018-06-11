@@ -7,6 +7,8 @@ mod fr;
 
 #[cfg(test)]
 mod tests;
+#[cfg(feature = "serialization-serde")]
+mod serde_impl;
 
 pub use self::ec::{
     G1, G1Affine, G1Compressed, G1Prepared, G1Uncompressed, G2, G2Affine, G2Compressed, G2Prepared,
