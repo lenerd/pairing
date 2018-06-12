@@ -1,13 +1,11 @@
 use super::{Fq, FqRepr, Fr, FrRepr, G1, G1Affine, G2, G2Affine};
-use {CurveAffine, CurveProjective, EncodedPoint, PrimeField, PrimeFieldRepr};
+use {CurveAffine, CurveProjective, EncodedPoint, PrimeField};
 
 use serde::de::Error as DeserializeError;
-use serde::ser::Error as SerializeError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 const ERR_LEN: &str = "wrong length of deserialized group element";
 const ERR_CODE: &str = "deserialized bytes don't encode a group element";
-const ERR_IO: &str = "error writing to a byte vector";
 
 impl Serialize for G1 {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
@@ -88,13 +86,13 @@ impl<'de> Deserialize<'de> for Fr {
 
 impl Serialize for FrRepr {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        serialize_prime_field_repr(self, s)
+        self.0.serialize(s)
     }
 }
 
 impl<'de> Deserialize<'de> for FrRepr {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        Ok(deserialize_prime_field_repr(FrRepr([0; 4]), d)?)
+        Ok(FrRepr(<_>::deserialize(d)?))
     }
 }
 
@@ -112,37 +110,14 @@ impl<'de> Deserialize<'de> for Fq {
 
 impl Serialize for FqRepr {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        serialize_prime_field_repr(self, s)
+        self.0.serialize(s)
     }
 }
 
 impl<'de> Deserialize<'de> for FqRepr {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        Ok(deserialize_prime_field_repr(FqRepr([0; 6]), d)?)
+        Ok(FqRepr(<_>::deserialize(d)?))
     }
-}
-
-/// Serializes a prime field element representation.
-fn serialize_prime_field_repr<S, F>(f: &F, s: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-    F: PrimeFieldRepr,
-{
-    let mut bytes = Vec::new();
-    f.write_be(&mut bytes)
-        .map_err(|_| S::Error::custom(ERR_IO))?;
-    bytes.serialize(s)
-}
-
-/// Deserializes a prime field element representation.
-fn deserialize_prime_field_repr<'de, D, F>(mut f: F, d: D) -> Result<F, D::Error>
-where
-    D: Deserializer<'de>,
-    F: PrimeFieldRepr,
-{
-    let bytes = Vec::<u8>::deserialize(d)?;
-    f.read_be(&bytes[..]).map_err(|_| D::Error::custom(ERR_IO))?;
-    Ok(f)
 }
 
 #[cfg(test)]
