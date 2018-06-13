@@ -15,7 +15,7 @@ extern crate byteorder;
 #[macro_use]
 extern crate ff;
 extern crate rand;
-#[cfg(feature = "serialization-serde")]
+#[cfg(feature = "serde")]
 extern crate serde;
 
 #[cfg(test)]
