@@ -1,4 +1,4 @@
-use super::{Fq, FqRepr, Fr, FrRepr, G1, G1Affine, G2, G2Affine};
+use super::{Fq, FqRepr, Fr, FrRepr, G1Affine, G2Affine, G1, G2};
 use {CurveAffine, CurveProjective, EncodedPoint, PrimeField};
 
 use serde::de::Error as DeserializeError;
@@ -125,6 +125,7 @@ mod tests {
     extern crate serde_json;
 
     use super::*;
+    use bls12_381::Fq12;
 
     use std::fmt::Debug;
 
@@ -165,5 +166,12 @@ mod tests {
         let f: Fq = rng.gen();
         test_roundtrip(&f);
         test_roundtrip(&f.into_repr());
+    }
+
+    #[test]
+    fn serde_fq12() {
+        let mut rng = XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+        let f: Fq12 = rng.gen();
+        test_roundtrip(&f);
     }
 }
